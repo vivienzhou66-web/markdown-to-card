@@ -4,15 +4,22 @@ import { saveAs } from 'file-saver';
 
 export const exportToPng = async (element: HTMLElement, filename: string = 'card.png'): Promise<void> => {
   try {
+    // 获取元素的实际尺寸
+    const rect = element.getBoundingClientRect();
+    const width = Math.max(element.offsetWidth, rect.width);
+    const height = Math.max(element.offsetHeight, rect.height);
+    
     const dataUrl = await toPng(element, {
       quality: 1,
       pixelRatio: 2,
       backgroundColor: '#ffffff',
-      width: element.scrollWidth,
-      height: element.scrollHeight,
+      width: width,
+      height: height,
       style: {
         transform: 'none',
         transformOrigin: 'top left',
+        width: `${width}px`,
+        height: `${height}px`,
       },
     });
 
@@ -34,15 +41,21 @@ export const exportAllPages = async (
     const zip = new JSZip();
     
     for (const page of pages) {
+      const rect = page.element.getBoundingClientRect();
+      const width = Math.max(page.element.offsetWidth, rect.width);
+      const height = Math.max(page.element.offsetHeight, rect.height);
+      
       const dataUrl = await toPng(page.element, {
         quality: 1,
         pixelRatio: 2,
         backgroundColor: '#ffffff',
-        width: page.element.scrollWidth,
-        height: page.element.scrollHeight,
+        width: width,
+        height: height,
         style: {
           transform: 'none',
           transformOrigin: 'top left',
+          width: `${width}px`,
+          height: `${height}px`,
         },
       });
 
@@ -61,15 +74,21 @@ export const exportAllPages = async (
 
 export const copyToClipboard = async (element: HTMLElement): Promise<void> => {
   try {
+    const rect = element.getBoundingClientRect();
+    const width = Math.max(element.offsetWidth, rect.width);
+    const height = Math.max(element.offsetHeight, rect.height);
+    
     const dataUrl = await toPng(element, {
       quality: 1,
       pixelRatio: 2,
       backgroundColor: '#ffffff',
-      width: element.scrollWidth,
-      height: element.scrollHeight,
+      width: width,
+      height: height,
       style: {
         transform: 'none',
         transformOrigin: 'top left',
+        width: `${width}px`,
+        height: `${height}px`,
       },
     });
 
