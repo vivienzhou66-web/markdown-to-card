@@ -1,5 +1,7 @@
 import React, { forwardRef } from 'react';
 import type { Theme } from '../types';
+import type { AspectRatio } from './AspectRatioSelector';
+import { getAspectRatioDimensions } from './AspectRatioSelector';
 
 interface Page {
   id: number;
@@ -11,76 +13,85 @@ interface CardPreviewProps {
   currentPage: number;
   theme: Theme;
   pageNumberPosition: 'left' | 'right' | 'center';
+  aspectRatio: AspectRatio;
 }
 
-const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(({ pages, currentPage, theme, pageNumberPosition }, ref) => {
-  const getBackgroundStyle = (bg: string): React.CSSProperties => {
-    if (bg.includes('gradient')) {
-      return { background: bg };
+const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(
+  ({ pages, currentPage, theme, pageNumberPosition, aspectRatio }, ref) => {
+    const getBackgroundStyle = (bg: string): React.CSSProperties => {
+      if (bg.includes('gradient')) {
+        return { background: bg };
+      }
+      return { backgroundColor: bg };
+    };
+
+    const dimensions = getAspectRatioDimensions(aspectRatio);
+    
+    const cardStyle: React.CSSProperties = {
+      ...getBackgroundStyle(theme.cardBackground),
+      color: theme.textColor,
+      fontFamily: theme.fontFamily,
+      borderRadius: theme.borderRadius,
+      boxShadow: theme.shadow,
+      padding: '32px',
+      width: dimensions ? `${dimensions.width}px` : '480px',
+      height: dimensions ? `${dimensions.height}px` : 'auto',
+      minHeight: dimensions ? undefined : '400px',
+      boxSizing: 'border-box',
+      wordWrap: 'break-word',
+      overflowWrap: 'break-word',
+      position: 'relative',
+      display: 'flex',
+      flexDirection: 'column',
+    };
+
+    const contentStyle: React.CSSProperties = {
+      ...getBackgroundStyle(theme.backgroundColor),
+      borderRadius: theme.borderRadius,
+      padding: '24px',
+      flex: 1,
+      overflow: 'auto',
+    };
+
+    const pageNumberStyle: React.CSSProperties = {
+      position: 'absolute',
+      bottom: '12px',
+      fontSize: '12px',
+      color: theme.textColor,
+      opacity: 0.6,
+      ...(pageNumberPosition === 'left' && { left: '24px' }),
+      ...(pageNumberPosition === 'right' && { right: '24px' }),
+      ...(pageNumberPosition === 'center' && { left: '50%', transform: 'translateX(-50%)' }),
+    };
+
+    const currentPageData = pages[currentPage];
+
+    if (!currentPageData) {
+      return (
+        <div ref={ref} className="card-preview" style={cardStyle}>
+          <div style={contentStyle}>
+            <p style={{ color: theme.textColor, opacity: 0.5 }}>开始编辑内容...</p>
+          </div>
+        </div>
+      );
     }
-    return { backgroundColor: bg };
-  };
 
-  const cardStyle: React.CSSProperties = {
-    ...getBackgroundStyle(theme.cardBackground),
-    color: theme.textColor,
-    fontFamily: theme.fontFamily,
-    borderRadius: theme.borderRadius,
-    boxShadow: theme.shadow,
-    padding: '32px',
-    minHeight: '200px',
-    width: '480px',
-    boxSizing: 'border-box',
-    wordWrap: 'break-word',
-    overflowWrap: 'break-word',
-    position: 'relative',
-  };
-
-  const contentStyle: React.CSSProperties = {
-    ...getBackgroundStyle(theme.backgroundColor),
-    borderRadius: theme.borderRadius,
-    padding: '24px',
-    minHeight: '400px',
-  };
-
-  const pageNumberStyle: React.CSSProperties = {
-    position: 'absolute',
-    bottom: '12px',
-    fontSize: '12px',
-    color: theme.textColor,
-    opacity: 0.6,
-    ...(pageNumberPosition === 'left' && { left: '24px' }),
-    ...(pageNumberPosition === 'right' && { right: '24px' }),
-    ...(pageNumberPosition === 'center' && { left: '50%', transform: 'translateX(-50%)' }),
-  };
-
-  const currentPageData = pages[currentPage];
-
-  if (!currentPageData) {
     return (
       <div ref={ref} className="card-preview" style={cardStyle}>
-        <div style={contentStyle}>
-          <p style={{ color: theme.textColor, opacity: 0.5 }}>开始编辑内容...</p>
-        </div>
+        <div
+          className="card-content"
+          style={contentStyle}
+          dangerouslySetInnerHTML={{ __html: getStyledHtml(currentPageData.content, theme) }}
+        />
+        {pages.length > 1 && (
+          <div style={pageNumberStyle}>
+            {currentPage + 1} / {pages.length}
+          </div>
+        )}
       </div>
     );
   }
-
-  return (
-    <div ref={ref} className="card-preview" style={cardStyle}>
-      <div
-        className="card-content"
-        style={contentStyle}
-        dangerouslySetInnerHTML={{ __html: getStyledHtml(currentPageData.content, theme) }}
-      />
-      {pages.length > 1 && (
-        <div style={pageNumberStyle}>
-          {currentPage + 1} / {pages.length}
-        </div>
-      )}
-    </div>
-  );
-});
+);
 
 CardPreview.displayName = 'CardPreview';
 

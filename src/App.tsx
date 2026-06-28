@@ -5,6 +5,8 @@ import ThemeSelector from './components/ThemeSelector';
 import ExportButton from './components/ExportButton';
 import Pagination from './components/Pagination';
 import PaginationSettings from './components/PaginationSettings';
+import AspectRatioSelector from './components/AspectRatioSelector';
+import type { AspectRatio } from './components/AspectRatioSelector';
 import { themes } from './themes';
 import { markdownToHtml, splitPages } from './utils/markdown';
 import { exportToPng, exportAllPages, copyToClipboard } from './utils/export';
@@ -15,8 +17,8 @@ const App: React.FC = () => {
   const [currentTheme, setCurrentTheme] = useState(themes[0]);
   const [currentPage, setCurrentPage] = useState(0);
   const [pageNumberPosition, setPageNumberPosition] = useState<'left' | 'right' | 'center'>('center');
+  const [aspectRatio, setAspectRatio] = useState<AspectRatio>('3:4');
   const cardRef = useRef<HTMLDivElement>(null);
-  const allPageRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
   const pages = useMemo(() => {
     const pageContents = splitPages(markdown);
@@ -33,15 +35,12 @@ const App: React.FC = () => {
   }, [currentPage]);
 
   const handleExportAllPages = useCallback(async () => {
-    if (allPageRefs.current.size > 0) {
-      const pageElements = pages.map((page) => ({
-        id: page.id,
-        element: allPageRefs.current.get(page.id)!,
-      })).filter((p) => p.element);
-      
-      if (pageElements.length > 0) {
-        await exportAllPages(pageElements, 'card');
-      }
+    if (cardRef.current) {
+      const elements = pages.map((_, index) => ({
+        id: index,
+        element: cardRef.current!,
+      }));
+      await exportAllPages(elements, 'card');
     }
   }, [pages]);
 
@@ -68,6 +67,7 @@ const App: React.FC = () => {
           <span className="logo-text">Markdown to Card</span>
         </div>
         <div className="header-actions">
+          <AspectRatioSelector value={aspectRatio} onChange={setAspectRatio} />
           <PaginationSettings
             pageNumberPosition={pageNumberPosition}
             onPositionChange={setPageNumberPosition}
@@ -93,6 +93,7 @@ const App: React.FC = () => {
             currentPage={currentPage}
             theme={currentTheme}
             pageNumberPosition={pageNumberPosition}
+            aspectRatio={aspectRatio}
           />
           <Pagination
             pages={pages}

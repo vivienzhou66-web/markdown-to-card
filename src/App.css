@@ -467,3 +467,48 @@ body {
   flex-direction: column;
   gap: 16px;
 }
+
+/* Aspect Ratio Selector */
+.aspect-ratio-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ratio-options {
+  display: flex;
+  gap: 4px;
+}
+
+.ratio-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-secondary);
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--text-primary);
+  transition: all 0.15s ease;
+}
+
+.ratio-btn:hover {
+  border-color: var(--accent-color);
+}
+
+.ratio-btn.active {
+  background: var(--accent-color);
+  color: white;
+  border-color: var(--accent-color);
+}
+
+.ratio-icon {
+  font-size: 14px;
+}
+
+.ratio-label {
+  font-weight: 500;
+}
